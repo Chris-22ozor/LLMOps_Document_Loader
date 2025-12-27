@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: document_portal
+Version: 0.1
+Summary: document management portal built with FASTAPI
+Home-page: 
+Author: Chris
+Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: description-content-type
+Dynamic: summary

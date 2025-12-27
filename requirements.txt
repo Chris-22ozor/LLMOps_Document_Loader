@@ -1,0 +1,11 @@
+langchain
+python-dotenv
+langchain_groq
+langchain_google_genai
+langchain_community
+pypdf
+## langchain.document_loaders
+faiss-cpu
+sentence-transformers
+langchain_openai
+
