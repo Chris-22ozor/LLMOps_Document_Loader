@@ -6,6 +6,9 @@ langchain_community
 pypdf
 ## langchain.document_loaders
 faiss-cpu
-sentence-transformers
+structlog
+PyMuPDF
+-e .
+
 langchain_openai
 
