@@ -6,6 +6,9 @@ embedding_model:
   provider: "google"
   model_name: "models/text-embedding-004"
 
+  provider: "openai"
+  model_name: "text-embedding-3-small"
+
 retriever:
   top_k: 10
 
@@ -21,3 +24,9 @@ llm:
     model_name: "gemini-2.0-flash"
     temperature: 0
     max_output_tokens: 2048
+
+  openai:
+    provider: "openai"
+    model_name: "gpt-4o"
+    temperature: 0
+    max_tokens: 2048
