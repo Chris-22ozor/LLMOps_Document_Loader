@@ -28,5 +28,6 @@ src/single_document_chat/data_ingestion.py
 src/single_document_chat/evaluation.py
 src/single_document_chat/retrieval.py
 utils/__init__.py
-utils/llm_utils.py
+utils/config_loader.py
+utils/model_loader.py
 utils/streamlit_ui.py
