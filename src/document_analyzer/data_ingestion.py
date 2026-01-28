@@ -85,7 +85,8 @@ if __name__ == "__main__":
             self.name = Path(file_path).name
             self._file_path = file_path
 
-        def getbuffer(self):
+        #loads data in memory
+        def getbuffer(self): 
             return open(self._file_path, "rb"). read() 
         
     dummy_pdf = DummyFile(pdf_path)

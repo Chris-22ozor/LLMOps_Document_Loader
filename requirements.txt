@@ -12,4 +12,5 @@ PyMuPDF
 
 langchain_openai
 langchain_core
+sys
 

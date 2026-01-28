@@ -60,12 +60,12 @@ class CustomLogger:
     
 # # ---Usage Example ---
 if __name__ == "__main__":
-        logger = CustomLogger()
-        logger = logger.get_logger(__file__)
+        # logger = CustomLogger()
+        logger = CustomLogger().get_logger(__file__)
         logger.info("Custom Logger initialized")
         # logger = CustomLogger().get_logger(__file__)
-        # logger.info("User uploaded a file", user_id=123, filename="report.pdf")
-        # logger.error("Failed to process PDF", error="File not found", user_id=123)
+        logger.info("User uploaded a file", user_id=123, filename="report.pdf")
+        logger.error("Failed to process PDF", error="File not found", user_id=123)
 
 
     #

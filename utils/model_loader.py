@@ -47,7 +47,7 @@ class ModelLoader:
 
         # if something is missing in the list, we'll log the error message
         if missing:
-            log.error("missing envrionment variables", missing_vars = missing)  # log the error message
+            log.error("missing environment variables", missing_vars = missing)  # log the error message
             raise DocumentPortalException("Missing environment variables", sys) # sys for traceback
         
         # else if everything is fine, if the keys are all there, we'll log the info too
