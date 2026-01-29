@@ -8,9 +8,8 @@ pypdf
 faiss-cpu
 structlog
 PyMuPDF
--e .
+# -e .
 
 langchain_openai
 langchain_core
-sys
 

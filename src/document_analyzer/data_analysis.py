@@ -12,7 +12,7 @@ from model.models import *
 from langchain_core.output_parsers import JsonOutputParser 
 # from langchain.output_parsers import OutputFixingParser 
 
-from prompts.prompt_library import *
+from prompts.prompt_library import PROMPT_REGISTRY
 
 
 class DocumentAnalyzer:
@@ -33,7 +33,7 @@ class DocumentAnalyzer:
             self.parser = JsonOutputParser(pydantic_object=Metadata, llm=self.llm)
             # self.fixing_parser = OutputFixingParser.from_llm(parser=self.parser, llm=self.llm)
 
-            self.prompt = prompt
+            self.prompt = PROMPT_REGISTRY["document_analysis"] #taking module specific prompt
 
             self.log.info("DocumentAnalyzer initialized successfully")
 
