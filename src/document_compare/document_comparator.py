@@ -17,17 +17,33 @@ from langchain_core.output_parsers import JsonOutputParser
 
 class DocumentComparatorLLM:
     def __init__(self):
-        pass
+        load_dotenv()
+        self.log = CustomLogger().get_logger(__name__)
+        self.loader = ModelLoader()
+        self.parser = JsonOutputParser(pydantic_object="SummaryResponse")
+        self.prompt = PROMPT_REGISTRY["document_comparison"]
+        self.chain = self.prompt | self.llm | self.parser 
+        self.log.info("DocumentComparatorLLM initialized with model and parser.")
 
+        # self.fixing_parser = OutputFixingParser.from_llm(parser=self.parser, llm=self.llm)
 
     def compare_documents(self):
         """
         Compares two documents and returns a structured comparison
         """
-        pass 
+        try:
+            pass
+        except Exception as e:
+            self.log.error(f"Error in compare_documents: {e}")
+            raise DocumentPortalException ("An error occurred while comparing documents", sys)
 
 
     def _format_response(self):
-        """Format the response from the LLM into a structured format
+        """Format the response from the LLM into a structured format (private method in p)
         """
-        pass
+        try:
+            pass
+        except Exception as e:
+            self.log.error(f"Error formatting response into DataFrame: {e}")
+            raise DocumentPortalException ("An error occurred while formatting response", sys)
+

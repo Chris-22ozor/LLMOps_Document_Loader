@@ -10,11 +10,11 @@ from exception.custom_exception import DocumentPortalException
 class DocumentComparator:
     """
     Save, read , delete & combine PDFs for comparison with session-based versioning  
-
+    its more about file loading
     """
 
     def __init__(self):
-        pass 
+        pass
 
     def delete_existing_files(self):
         """
