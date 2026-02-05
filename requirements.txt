@@ -8,6 +8,7 @@ pypdf
 faiss-cpu
 structlog
 PyMuPDF
+pandas
 # -e .
 
 langchain_openai
