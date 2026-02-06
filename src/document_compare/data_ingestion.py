@@ -75,18 +75,18 @@ class DocumentIngestion:
         """
         try:
             with fitz.open(pdf_path) as doc:
-                if doc.is_encrypted():
+                if doc.is_encrypted:
                     raise ValueError(f"PDF is encrypted: {pdf_path.name}")
                 
-            all_text = []  # extracting all text in a list
-            for page_num in range(doc.page_count):
-                doc.load_page(page_num)
-                text = page.get_text() # type: ignore
-                if text.strip():  # if text hast white spaces, then strip it
-                    all_text.append(f"\n ----- Page {page_num + 1 }----- \n{text}") 
-            self.log.info("PDF read successfully", file= str(pdf_path), pages =len(all_text))
+                all_text = []  # extracting all text in a list
+                for page_num in range(doc.page_count):
+                    page = doc.load_page(page_num)
+                    text = page.get_text() # type: ignore
 
-            return "\n".join(all_text)
+                    if text.strip():  # if text hast white spaces, then strip it
+                       all_text.append(f"\n ----- Page {page_num + 1 }----- \n{text}") 
+                self.log.info("PDF read successfully", file= str(pdf_path), pages =len(all_text))
+                return "\n".join(all_text)
 
         except Exception as e:
             self.log.error(f"Error reading PDF: {e}")

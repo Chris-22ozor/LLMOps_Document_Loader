@@ -20,7 +20,8 @@ class DocumentComparatorLLM:
         load_dotenv()
         self.log = CustomLogger().get_logger(__name__)
         self.loader = ModelLoader()
-        self.parser = JsonOutputParser(pydantic_object="SummaryResponse")
+        self.llm = self.loader.load_llm()
+        self.parser = JsonOutputParser(pydantic_object=SummaryResponse)
         self.prompt = PROMPT_REGISTRY["document_comparison"]
         self.chain = self.prompt | self.llm | self.parser 
         self.log.info("DocumentComparatorLLM initialized with model and parser.")
@@ -34,8 +35,8 @@ class DocumentComparatorLLM:
         try:
             inputs = {
                 "combined_docs": combined_docs,
-                "format_instructions": self.parser.get_format_instructions() }
-            self.log.info("Starting document comparison", inputs=inputs)
+                "format_instruction": self.parser.get_format_instructions() }
+            self.log.info("Starting document comparison", inputs=inputs) 
 
             response= self.chain.invoke(inputs)
             self.log.info("Document comparison completed", response=response)

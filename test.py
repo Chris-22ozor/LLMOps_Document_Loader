@@ -72,9 +72,9 @@ def load_fake_uploaded_file(file_path: Path):
 
 # ---- Step 1: Save and combine PDFs ---- #
 def test_compare_documents():
-    ref_path = Path("C:\Users\admin\LLMOps_Document_Loader\data\document_compare\Long_Report_v1.pdf")
+    ref_path = Path(r"C:\Users\admin\LLMOps_Document_Loader\data\document_compare\Long_Report_v1.pdf")
 
-    act_path = Path("C:\Users\admin\LLMOps_Document_Loader\data\document_compare\Long_Report_v2.pdf")
+    act_path = Path(r"C:\Users\admin\LLMOps_Document_Loader\data\document_compare\Long_Report_v2.pdf")
 
     # Wrap them like Streamlit UploadedFile-style
     class FakeUpload:
@@ -93,7 +93,7 @@ def test_compare_documents():
     # Save files and combine
     ref_file, act_file = comparator.save_uploaded_files(ref_upload, act_upload)
     combined_text = comparator.combine_documents()
-    comparator.clean_old_sessions(keep_latest=3)
+    # comparator.clean_old_sessions(keep_latest=3)
 
     print("\n Combined Text Preview (First 1000 chars):\n")
     print(combined_text[:1000])
