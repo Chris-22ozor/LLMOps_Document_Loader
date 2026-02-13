@@ -1,17 +1,43 @@
-langchain
+# langchain
 python-dotenv
-langchain_groq
-langchain_google_genai
-langchain_community
+langchain-groq
+#langchain_google_genai
+#langchain_community
 pypdf
 ## langchain.document_loaders
 faiss-cpu
 structlog
 PyMuPDF
 pandas
+streamlit
+langchain-core[tracing] #how many tokens we will be using in a single call
+pytest
 # -e .
+# langchain_core 
 
-langchain_openai
-langchain_core 
+
+# langchain==0.3.25
+# langchain-core==0.3.55
+# langchain-community==0.3.25
+# langchain-openai==0.3.25
+# langchain-groq==0.3.2
+# langchain-google-genai==2.0.0
+# langchain>=0.2.0
+
+
+langchain
+langchain-core
+langchain-community
+langchain-openai
+langchain-groq
+langchain-google-genai
+
+
+# langchain==0.1.17
+# langchain-community==0.0.36
+# langchain-core==0.1.52
+# langchain-google-genai==0.0.8
+
+
 
 

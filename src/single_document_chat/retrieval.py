@@ -1,13 +1,14 @@
 import sys 
 import os 
 
+import streamlit as st
 from dotenv import load_dotenv 
 
 from langchain_core.chat_history import BaseChatMessageHistory 
 from langchain_community.chat_message_histories import ChatMessageHistory 
 from langchain_community.vectorstores import FAISS 
 from langchain_core.runnables.history import RunnableWithMessageHistory 
-from langchain.chains import create_history_aware_retriever, create_retrieval_chains 
+from langchain.chains import create_history_aware_retriever, create_retrieval_chain 
 from langchain.chains.combine_documents import create_stuff_documents_chain 
 
 from utils.model_loader import ModelLoader
@@ -20,11 +21,37 @@ from model.models import PromptType
 
 
 class ConversationalRAG:
-    def __init__(self, session_id:str, retriever) -> None:
+    def __init__(self, session_id:str, retriever):
         try:
             self.log = CustomLogger().get_logger(__name__)
+            self.llm = self._load_llm()
+            self.retriever = retriever
+            self.session_id = session_id 
+            
+            # added from chatgpt
+            self.store = {}
 
 
+            self.contextualize_prompt = PROMPT_REGISTRY[PromptType.CONTEXTUALIZE_QUESTION.value]
+            self.qa_prompt  = PROMPT_REGISTRY[PromptType.CONTEXT_QA.value]
+            self.history_aware_retriever = create_history_aware_retriever(
+                self.llm, self.retriever, self.contextualize_prompt)
+            self.log.info("Created histroy aware retriver", session_id = session_id)
+
+            self.qa_chain = create_stuff_documents_chain(self.llm, self.qa_prompt)
+            self.rag_chain = create_retrieval_chain(self.history_aware_retriever, self.qa_chain)
+            self.log.info("Created RAG chain", session_id = session_id)
+
+
+            # final chain 
+            self.chain = RunnableWithMessageHistory(
+                self.rag_chain,
+                self._get_session_history,
+                input_messages_key="input",
+                history_messages_key="chat_history",
+                output_messages_key="answer"
+            )
+            self.log.info("Created RunnablesWithMessageHistory", session_id=session_id)
 
         except Exception as e:
             self.log.error("Error initializing conversational RAG", error=str(e), session_id = session_id)
@@ -33,7 +60,9 @@ class ConversationalRAG:
     def _load_llm(self):
         """ this called a private method in python. It is used when you don't want to call a method externally"""
         try:
-            pass
+            llm =  ModelLoader().load_llm()
+            self.log.info("LLM loaded successfully", class_name = llm.__class__.__name__)
+            return llm
 
         except Exception as e:
             self.log.error("Error loading llm via ModelLoader", error=str(e))
@@ -42,23 +71,50 @@ class ConversationalRAG:
 
     def _get_session_history(self, session_id:str):
         """ this called a private method in python. It is used when you don't want to call a method externally"""
+        # this try and return from chatgpt
         try:
-            pass
+            if session_id not in self.store:
+                self.store[session_id] = ChatMessageHistory()
+            return self.store[session_id]
+        
         except Exception as e:
             self.log.error("Failed to access session history", session_id =session_id,  error= str(e))
             raise DocumentPortalException ("Failed to retrieve session history", sys) 
 
-    def load_retriever_from_faiss(self):
+    def load_retriever_from_faiss(self, index_path:str):
         try:
-            pass
+            embeddings = ModelLoader().load_embeddings()
+
+            # this script is to validate if the embeddings path is there
+            if not os.path.isdir(index_path):
+                raise FileNotFoundError(f"FAISS index directory not found", index_path =index_path)
+            
+            #
+            vectorstore = FAISS.load_local(index_path, embeddings)
+            self.log.info("Loaded retriver from FAISS index", index_path = index_path)
+            return vectorstore.as_retriever(search_type = "similarity", search_kwargs = {"k":5})
 
         except Exception as e:
             self.log.error("Failed to load retriever from FAISS", error=str(e))
             raise DocumentPortalException ("Error loading retriever from FAISS", sys) 
         
-    def invoke(self):
+    def invoke(self, user_input:str) -> str:
+        # we have a chain , we have  to invoke the chain to get a resposnse
         try:
-            pass
+            response = self.chain.invoke(
+                {"input": user_input},
+                config = {"configurable":{"session_id": self.session_id}}      
+            )
+            answer = response.get("answer", "No answer")
+
+            # if the answer is not there, I will log below. If the answer is there, I will return the answer
+            if not answer:
+                self.log.warning("Empty answer received", session_id = self.session_id)
+
+            self.log.info("Chain invoked successfuly", 
+                          session_id= self.session_id, 
+                          user_input=user_input,
+                          answer_preview = answer[:150])
 
         except Exception as e:
             self.log.error("Failed to invoke conversational RAG", session_id=self.session_id, error=str(e))
