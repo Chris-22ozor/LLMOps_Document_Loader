@@ -44,10 +44,10 @@ class SingleDocIngestor:
                     f_out.write(uploaded_file.read())
                 self.log.info("PDF saved for ingestion", filename=uploaded_file.name)
 
-                loader = PyPDFLoader(str(temp_path))
-                docs = loader.load()
+                loader = PyPDFLoader(str(temp_path))  # we start the machine, the loader
+                docs = loader.load()  # it loads and return t
                 documents.extend(docs)
-                return self._create_retriever(documents)
+            return self._create_retriever(documents)
 
         except Exception as e:
             self.log.error("Document ingestion failed", error=str(e))

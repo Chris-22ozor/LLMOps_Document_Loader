@@ -12,7 +12,7 @@ pandas
 streamlit
 langchain-core[tracing] #how many tokens we will be using in a single call
 pytest
-# -e .
+-e .
 # langchain_core 
 
 

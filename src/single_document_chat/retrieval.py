@@ -35,7 +35,7 @@ class ConversationalRAG:
             self.contextualize_prompt = PROMPT_REGISTRY[PromptType.CONTEXTUALIZE_QUESTION.value]
             self.qa_prompt  = PROMPT_REGISTRY[PromptType.CONTEXT_QA.value]
             self.history_aware_retriever = create_history_aware_retriever(
-                self.llm, self.retriever, self.contextualize_prompt)
+                self.llm, self.retriever, self.contextualize_prompt) # what I have asked in previous conversation and question
             self.log.info("Created histroy aware retriver", session_id = session_id)
 
             self.qa_chain = create_stuff_documents_chain(self.llm, self.qa_prompt)
@@ -115,6 +115,8 @@ class ConversationalRAG:
                           session_id= self.session_id, 
                           user_input=user_input,
                           answer_preview = answer[:150])
+            return answer
+        
 
         except Exception as e:
             self.log.error("Failed to invoke conversational RAG", session_id=self.session_id, error=str(e))
