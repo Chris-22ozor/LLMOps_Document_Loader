@@ -88,19 +88,17 @@ class DocumentIngestor:
                 docs = loader.load()
                 documents.extend(docs)
 
-                if not documents:
-                    raise DocumentPortalException("No valid document loaded", sys)
+            if not documents:
+                raise DocumentPortalException("No valid document loaded", sys)
                 
-                self.log.info("All documents loaded", total_docs=len(documents),
+            self.log.info("All documents loaded", total_docs=len(documents),
                               session_id = self.session_id)
             return self._create_retriever (documents)
         
-
-
-
         except Exception as e:
             self.log.error("Failed to ingest files", error = str(e)) 
             raise DocumentPortalException("Ingesting error in DocumentIngestor", sys)
+        
 
     def _create_retriever(self,documents):
         try:
