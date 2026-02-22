@@ -29,8 +29,8 @@ class ConversationalRAG:
     def __init__(self, session_id:str, retriever=None):
         try:
             self.log = CustomLogger().get_logger(__name__)
-            self.llm = self._load_llm()
             self.session_id = session_id
+            self.llm = self._load_llm()
             self.contextualize_prompt:ChatPromptTemplate = PROMPT_REGISTRY[PromptType.CONTEXTUALIZE_QUESTION.value]
             self.qa_prompt: ChatPromptTemplate = PROMPT_REGISTRY[PromptType.CONTEXT_QA.value]
 
@@ -75,6 +75,7 @@ class ConversationalRAG:
             if not llm:
                 raise ValueError("LLM could not be loaded")
             self.log.error("LLM loaded successfully", session_id = self.session_id)
+            return llm
         
         except Exception as e:
             self.log.error("Failed to load llm", error= str(e))
@@ -113,10 +114,11 @@ class ConversationalRAG:
         try:
             # rewrite questions using chathistory
             question_rewriter = (
-                {"input": itemgetter("input"), "chat_history": itemgetter("chat_history")}
-                | self.qa_prompt
+                {"input": itemgetter("input"), 
+                 "chat_history": itemgetter("chat_history")}
+                | self.contextualize_prompt
                 | self.llm
-                | StrOutputParser
+                | StrOutputParser()
             )
              # retrieve docs for rewritten questions
             retrieve_docs = question_rewriter | self.retriever | self._format_docs #this is called a sequential chain

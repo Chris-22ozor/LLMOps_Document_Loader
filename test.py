@@ -174,9 +174,10 @@ from src.multi_document_chat.retrieval import ConversationalRAG
 def test_document_ingestion_and_rag():
     try:
         test_files = [
-            "data\\multi_doc_chat\\market_analysis_report.docx",
+           
             "data\\multi_doc_chat\\NIPS-2017-attention-is-all-you-need-Paper.pdf",
-            "data\\multi_doc_chat\\sample.pdf",
+            # "data\multi_doc_chat.py\NIPS-2017-attention-is-all-you-need-Paper.pdf
+            "data\\multi_doc_chat\\Sammple.pdf",
             "data\\multi_doc_chat\\state_of_the_union.txt"
         ]
         
@@ -203,7 +204,7 @@ def test_document_ingestion_and_rag():
         
         rag = ConversationalRAG(session_id=session_id, retriever=retriever)
         
-        question = "what is President Zelenskyy said in their speech in parliament?"
+        question = "what did President Zelensky say in his speech to European the parliament?"
         
         answer=rag.invoke(question)
         
