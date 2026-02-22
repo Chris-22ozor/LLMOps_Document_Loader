@@ -4,6 +4,9 @@ import os
 import streamlit as st
 from dotenv import load_dotenv 
 
+from typing import List, Optional
+from langchain_core.messages import BaseMessage
+
 from langchain_core.chat_history import BaseChatMessageHistory 
 from langchain_community.chat_message_histories import ChatMessageHistory 
 from langchain_community.vectorstores import FAISS 

@@ -3,6 +3,9 @@ import os
 
 from operator import itemgetter
  
+from typing import List, Optional
+
+
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate 
 from langchain_core.output_parsers import StrOutputParser 
@@ -79,9 +82,21 @@ class ConversationalRAG:
             raise DocumentPortalException ("LLM loading error in ConversationalRAG", sys)
 
 
-    def invoke(self):
+    def invoke(self, user_input:str, chat_history: Optional[List[BaseMessage]]=None) -> str:
         try:
-            pass
+            chat_history = chat_history or []
+            payload = {"input": user_input, "chat_history": chat_history}
+            answer = self.chain.invoke(payload) #invoking the payload
+
+            if not answer:
+                self.log.warning("No answer generated", user_input=user_input, session_id= self.session_id)
+                return "no answer generated."
+            
+            self.log.info("Chain ivoked successfully",
+                          session_id = self.session_id,
+                          user_input = user_input,
+                          answer_preview = answer[:150],)
+            return answer
 
         except Exception as e:
             self.log.error("Failed to invoke ConversationaRAG", error = str(e))
