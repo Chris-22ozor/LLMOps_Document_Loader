@@ -40,8 +40,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent # project root
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
+#-- This is majorly for the authentication and cloud----#
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware, # for the cloud
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
