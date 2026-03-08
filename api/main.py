@@ -82,10 +82,13 @@ def _read_pdf_via_handler(handler:DocHandler, path:str) -> str:
     """"
     Helper function to read PDF using the DocHandler
     """
-    try:
-        pass
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error reading PDF: {str(e)}")
+    if hasattr(handler, "read_pdf"):
+        return handler.read_pdf(path) # type: ignore
+    if hasattr(handler, "read_"):
+        return handler.read_(path) # type: ignore
+    raise RuntimeError("DocHandler has neither read_pdf or read_ method.")
+
+
     
 @app.post("/analyze")
 async def analyze_document(file: UploadFile = File(...)) -> Any:
@@ -176,13 +179,17 @@ async def chat_query(
         log.info(f"Received chat query: '{question}' | session: {session_id}")
         if use_session_dirs and not session_id:
             raise HTTPException(status_code=400, detail="session_id is required when use_session_dirs=True")
-
+        
+        # Prepare FAISS Index Path
         index_dir = os.path.join(FAISS_BASE, session_id) if use_session_dirs else FAISS_BASE  # type: ignore
         if not os.path.isdir(index_dir):
             raise HTTPException(status_code=404, detail=f"FAISS index not found at: {index_dir}")
-
+        
+        # Initialize LCEL-style RAG pipeline
         rag = ConversationalRAG(session_id=session_id)
         rag.load_retriever_from_faiss(index_dir, k=k, index_name=FAISS_INDEX_NAME)  # build retriever + chain
+
+        # Optional: for now we pass empty chat histroy
         response = rag.invoke(question, chat_history=[])
         log.info("Chat query handled successfully.")
 
