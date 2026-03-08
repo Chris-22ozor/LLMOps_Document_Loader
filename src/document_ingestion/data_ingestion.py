@@ -104,7 +104,10 @@ class FaissManager:
         
         
 class ChatIngestor:
-    """How to ingest the data after doing the chunking"""
+    """How to ingest the data after doing the chunking.
+    We will initialize the Class (Motor vehicle) with the parameters below. 
+    Initialize meaning, set it up with the parameters(fuel, engine, oil) that will make it work
+    """
 
 
     def __init__( self,
@@ -114,6 +117,7 @@ class ChatIngestor:
         session_id: Optional[str] = None,
     ):
         try:
+            self.log = CustomLogger().get_logger(__name__)
             self.model_loader = ModelLoader()
             
             self.use_session = use_session_dirs
@@ -132,10 +136,13 @@ class ChatIngestor:
                       sessionized=self.use_session)
         except Exception as e:
             self.log.error("Failed to initialize ChatIngestor", error=str(e))
+            # e traces back your last execution instead of sys
             raise DocumentPortalException("Initialization error in ChatIngestor", e) from e
+        
             
         
     def _resolve_dir(self, base: Path):
+        """creates a directory under the session ID"""
         if self.use_session:
             d = base / self.session_id # e.g. "faiss_index/abc123"
             d.mkdir(parents=True, exist_ok=True) # creates dir if not exists
@@ -145,7 +152,7 @@ class ChatIngestor:
     def _split(self, docs: List[Document], chunk_size=1000, chunk_overlap=200) -> List[Document]:
         splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         chunks = splitter.split_documents(docs)
-        log.info("Documents split", chunks=len(chunks), chunk_size=chunk_size, overlap=chunk_overlap)
+        self.log.info("Documents split", chunks=len(chunks), chunk_size=chunk_size, overlap=chunk_overlap)
         return chunks
     
     def built_retriver( self,
@@ -155,27 +162,35 @@ class ChatIngestor:
         chunk_overlap: int = 200,
         k: int = 5,):
         try:
+
+            # Step 1: Save uploaded file path
             paths = save_uploaded_files(uploaded_files, self.temp_dir)
+            # Step 2: Load the document from the path
             docs = load_documents(paths)
             if not docs:
                 raise ValueError("No valid documents loaded")
             
+            # Step 3: Split the document (chunking)
             chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             
-            ## FAISS manager very very important class for the docchat
+            # Step 4: Set up the FAISS (Vectore store) FAISS manager very very important class for the docchat
             fm = FaissManager(self.faiss_dir, self.model_loader)
             
-            texts = [c.page_content for c in chunks]
-            metas = [c.metadata for c in chunks]
+            texts = [c.page_content for c in chunks] # get the text and metadata below
+            metas = [c.metadata for c in chunks] # metadata
             
+
+            # Step 5: Load metadata and text to the vectore store
             try:
-                vs = fm.load_or_create(texts=texts, metadatas=metas)
+                vs = fm.load_or_create(texts=texts, metadatas=metas) 
             except Exception:
                 vs = fm.load_or_create(texts=texts, metadatas=metas)
-                
+
+            # Step 6: Add the document to the vectore store    
             added = fm.add_documents(chunks)
             self.log.info("FAISS index updated", added=added, index=str(self.faiss_dir))
             
+            # Step 7: Use the vectore store as retriver
             return vs.as_retriever(search_type="similarity", search_kwargs={"k": k})
             
         except Exception as e:
