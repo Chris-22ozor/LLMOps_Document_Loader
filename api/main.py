@@ -30,9 +30,10 @@ FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index")  # <--- keep consisten
 #create object of the FastAPI
 app = FastAPI(title="Document Portal API", version="0.1")
 
-
+# Through the FAST API, we are serving our UI (the style template)
 # command for executing the fastapi
 # uvicorn api.main:app --reload
+# uvicorn api.main:app --host 0.0.0.0 --port 8082 --reload
 
 
 # serve static and templates
