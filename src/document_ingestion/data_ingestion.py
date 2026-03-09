@@ -50,6 +50,7 @@ class FaissManager:
     @staticmethod
     def _fingerprint(text: str, md: Dict[str, Any]) -> str:
         # for deduplication (remove the duplicates). duplicate entry should not be in the FAISS database
+        # Also this is for metadata. capture the source and metadata
         src = md.get("source") or md.get("file_path")
         rid = md.get("row_id")  # row id
         if src is not None:  # if source or file_path is not empty, return the row id

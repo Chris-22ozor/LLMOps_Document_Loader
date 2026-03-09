@@ -1,3 +1,5 @@
+# this module (model_loader) used for loading the model
+
 import os
 import sys
 
@@ -18,7 +20,7 @@ from langchain_openai import ChatOpenAI
 from logger.custom_logger import  CustomLogger
 from exception.custom_exception import DocumentPortalException
 
-# create a variable of the logger
+# create a variable of the logger for getting the appropriate file name
 log = CustomLogger().get_logger(__name__)
 
 
@@ -42,7 +44,7 @@ class ModelLoader:
         Ensure API keys exist
         """
         required_vars = ["GROQ_API_KEY", "OPENAI_API_KEY"]
-        self.api_keys = {key:os.getenv(key)  for key in required_vars}
+        self.api_keys = {key:os.getenv(key)  for key in required_vars} #get the key from os.getenv(key)
         missing = [k for k, v in self.api_keys.items()    if not v] # k, v represent key, value, if v is not there, write the key name
 
         # if something is missing in the list, we'll log the error message
@@ -75,7 +77,11 @@ class ModelLoader:
 
         llm_block = self.config["llm"] # llm_block from config.yaml
 
-        provider_key = os.getenv("LLM_PROVIDER", "openai") #default llm provider openai, check and get the llm provider  environment variable
+        log.info("Loading LLM....")
+
+        # check the first provider key from env variable ("LLM_PROVIDER") if it IS set 
+        # If it is not, take the default(second_key option) llm provider "openai"
+        provider_key = os.getenv("LLM_PROVIDER", "openai") 
 
         if provider_key not in llm_block:
             log.error("LLM provider not found in config", provider_key = provider_key)

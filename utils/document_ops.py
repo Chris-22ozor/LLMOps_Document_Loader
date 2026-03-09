@@ -4,7 +4,8 @@ from typing import Iterable, List
 from fastapi import UploadFile
 from langchain.schema import Document
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
-from logger import GLOBAL_LOGGER as log
+from logger.custom_logger import CustomLogger
+log = CustomLogger().get_logger(__name__)
 from exception.custom_exception import DocumentPortalException
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
@@ -53,7 +54,7 @@ class FastAPIFileAdapter:
         self._uf.file.seek(0)
         return self._uf.file.read()
 
-def read_pdf_via_handler(handler, path: str) -> str:
+def _read_pdf_via_handler(handler, path: str) -> str:
     if hasattr(handler, "read_pdf"):
         return handler.read_pdf(path)  # type: ignore
     if hasattr(handler, "read_"):

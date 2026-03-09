@@ -1,3 +1,7 @@
+## Set project Configurations in the form of Key, Value pair (yaml uses indentation and very readable)
+## while json has curly braces
+
+
 faiss_db:
   collection_name: "document_portal"
 
