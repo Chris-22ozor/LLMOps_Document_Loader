@@ -12,7 +12,6 @@ from src.document_ingestion.data_ingestion import (
     DocHandler,
     DocumentComparator,
     ChatIngestor,
-    FaissManager
 )
 
 from src.document_analyzer.data_analysis import DocumentAnalyzer
@@ -20,7 +19,8 @@ from src.document_compare.document_comparator import DocumentComparatorLLM
 from src.document_chat.retriever import ConversationalRAG
 
 
-from utils.document_ops import FastAPIFileAdapter, _read_pdf_via_handler
+from utils.document_ops import FastAPIFileAdapter, read_pdf_via_handler
+
 # from logger import GLOBAL_LOGGER as log
 
 FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
@@ -33,7 +33,12 @@ app = FastAPI(title="Document Portal API", version="0.1")
 # Through the FAST API, we are serving our UI (the style template)
 # command for executing the fastapi
 # uvicorn api.main:app --reload
+# uvicorn api.main:app --port 8082 --reload
+
 # uvicorn api.main:app --host 0.0.0.0 --port 8082 --reload
+# git checkout -b dev  -- to create a dev branch
+# git switch main  --- to switch back to the main branch
+
 
 
 # serve static and templates
@@ -52,6 +57,8 @@ app.add_middleware(
 
 # serving it here. Using all programming interface (API route) here,
 # We wil access the entire backend code
+
+# Home page or route will basically display the html page
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui(request: Request):
     # log.info("Serving UI homepage.")
@@ -60,6 +67,7 @@ async def serve_ui(request: Request):
     resp.headers["Cache-Control"] = "no-store"
     return resp
 
+# here, if I am able to get status:ok, service: documentportal, it means everything is working
 @app.get("/health")
 def health() -> Dict[str, str]:
     # self.log.info("Health check passed.")
@@ -79,7 +87,7 @@ class FastAPIFileAdapter:
 
 # ---------- ANALYZE ----------
 
-def _read_pdf_via_handler(handler:DocHandler, path:str) -> str:
+def read_pdf_via_handler(handler:DocHandler, path:str) -> str:
     """"
     Helper function to read PDF using the DocHandler
     """
@@ -97,7 +105,7 @@ async def analyze_document(file: UploadFile = File(...)) -> Any:
         
         dh = DocHandler()
         saved_path = dh.save_pdf(FastAPIFileAdapter(file))
-        text = _read_pdf_via_handler(dh, saved_path)
+        text = read_pdf_via_handler(dh, saved_path)
 
         analyzer = DocumentAnalyzer()
         result = analyzer.analyze_document(text)
@@ -116,10 +124,11 @@ async def compare_documents(reference: UploadFile = File(...), actual: UploadFil
     try:
         # log.info(f"Comparing files: {reference.filename} vs {actual.filename}")
         dc = DocumentComparator()
-        ref_path, act_path = dc.save_uploaded_files(
-            FastAPIFileAdapter(reference), FastAPIFileAdapter(actual)
-        )
-        _ = ref_path, act_path
+
+        ref_path, act_path = dc.save_uploaded_files(FastAPIFileAdapter(reference), FastAPIFileAdapter(actual))
+
+        _ = ref_path, act_path # why it was kept as underscore, its because we will not use it actively
+
         combined_text = dc.combine_documents()
         comp = DocumentComparatorLLM()
         df = comp.compare_documents(combined_text)
@@ -139,7 +148,7 @@ async def compare_documents(reference: UploadFile = File(...), actual: UploadFil
 async def chat_build_index(
     files: List[UploadFile] = File(...),
     session_id: Optional[str] = Form(None),
-    use_session_dirs: bool = Form(True),
+    use_session_dirs: bool = Form(True), # means for every event on the user interface, we will the sessions; so sessions will be created
     chunk_size: int = Form(1000),
     chunk_overlap: int = Form(200),
     k: int = Form(5),
@@ -147,8 +156,8 @@ async def chat_build_index(
     try:
         # log.info(f"Indexing chat session. Session ID: {session_id}, Files: {[f.filename for f in files]}")
         wrapped = [FastAPIFileAdapter(f) for f in files]
-        # this is my main class for storing a data into VDB
-        # created a object of ChatIngestor
+        # this is my main class (ChatIngestor) for storing a data into VDB
+        # created an object of ChatIngestor
         ci = ChatIngestor(
             temp_base=UPLOAD_BASE,
             faiss_base=FAISS_BASE,

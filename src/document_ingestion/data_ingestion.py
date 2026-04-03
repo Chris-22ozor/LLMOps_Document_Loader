@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Dict, Any
 
 import fitz  # PyMuPDF
-from langchain.schema import Document
+# from langchain.schema import Document
+from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 
@@ -164,7 +165,7 @@ class ChatIngestor:
         k: int = 5,):
         try:
 
-            # Step 1: Save uploaded file path
+            # Step 1: Save uploaded file (to the session folder) path
             paths = save_uploaded_files(uploaded_files, self.temp_dir)
             # Step 2: Load the document from the path
             docs = load_documents(paths)
