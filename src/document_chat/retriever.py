@@ -26,43 +26,61 @@ from model.models import PromptType
 
 
 class ConversationalRAG:
-    def __init__(self, session_id:str, retriever=None):
+    def __init__(self, session_id:Optional[str], retriever=None,index_path: Optional[str] = None, k:int=5):
         try:
             self.log = CustomLogger().get_logger(__name__)
             self.session_id = session_id
-            self.llm = self._load_llm()
+            
             self.contextualize_prompt:ChatPromptTemplate = PROMPT_REGISTRY[PromptType.CONTEXTUALIZE_QUESTION.value]
             self.qa_prompt: ChatPromptTemplate = PROMPT_REGISTRY[PromptType.CONTEXT_QA.value]
 
-            if retriever is None:
-                raise ValueError("Retriever cannot be None")
             self.retriever = retriever
+            self.chain = None
+            self.llm = self._load_llm()
+
+            if retriever is not None:
+              self.retriever = retriever
+
+            elif index_path is not None:
+              self.retriever = self.load_retriever_from_faiss(index_path, k=k)
+                 
+            else:
+                raise ValueError("Either retriever or index_path must be provided")
+            
             self._build_lcel_chain()
             self.log.info("ConversationalRAG initialized", session_id= self.session_id)
+
+            
+            # if self.retriever is not None:
+            #     self._build_lcel_chain()
+            # self.log.info("ConversationalRAG initialized", session_id= self.session_id)
 
         except Exception as e:
             self.log.error("Failed to initialize ConversationalRAG", error=str(e))
             raise DocumentPortalException("Initialization error in ConversationalRAG", sys)
 
-    def load_retriever_from_faiss(self, index_path:str):
+    def load_retriever_from_faiss(self, index_path:str, k: int = 5):
         """
         Load a FAISS Vectore store from disk and convert to retriever
         """ 
         try:
             embeddings = ModelLoader().load_embeddings()
             if not os.path.isdir(index_path):
+
                 raise FileNotFoundError (f"FAISS index directory not found: {index_path}")
             
             vectorestore = FAISS.load_local(index_path,
                                             embeddings, 
                              allow_dangerous_deserialization=True, #only if you trust the index
                              )
-            self.retriever = vectorestore.as_retriever(search_type="similarity", search_kwargs={"k":5})
+            retriever = vectorestore.as_retriever(search_type="similarity", search_kwargs={"k":k})
+            
+            #return self.retriever
 
             self.log.info("FAISS retriever loaded successfully", 
                           index_path = index_path, session_id = self.session_id)
     
-            return self.retriever
+            return retriever
         
         except Exception as e:
             self.log.error("Failed to load retriever from FAISS", error= str(e))
@@ -74,7 +92,7 @@ class ConversationalRAG:
 
             if not llm:
                 raise ValueError("LLM could not be loaded")
-            self.log.error("LLM loaded successfully", session_id = self.session_id)
+            self.log.info("LLM loaded successfully", session_id = self.session_id)
             return llm
         
         except Exception as e:
@@ -108,7 +126,7 @@ class ConversationalRAG:
         # static method doesn't have the self keyword, and cannot access the objects created by the class
         # I mean the ConversationalRAG class. It is often used as a utility function.
         # in format_docs whatever content we return we join it as page content
-        return "n\n".join(d.page_content for d in docs)
+        return  "\n\n".join(d.page_content for d in docs)
 
     def _build_lcel_chain(self):
         try:
@@ -133,7 +151,7 @@ class ConversationalRAG:
                 | self.llm
                 | StrOutputParser()
             )
-            self.log.info("LCEL chain buil successfully", session_id = self.session_id)
+            self.log.info("LCEL chain built successfully", session_id = self.session_id)
                  
         except Exception as e:
             self.log.error("Failed to build lcel chain", error = str(e))

@@ -196,8 +196,8 @@ async def chat_query(
             raise HTTPException(status_code=404, detail=f"FAISS index not found at: {index_dir}")
         
         # Initialize LCEL-style RAG pipeline
-        rag = ConversationalRAG(session_id=session_id)
-        rag.load_retriever_from_faiss(index_dir, k=k, index_name=FAISS_INDEX_NAME)  # build retriever + chain
+        rag = ConversationalRAG(session_id=session_id, index_path= index_dir,k=k)
+        # rag.load_retriever_from_faiss( k=k,index_path=index_dir)  # build retriever + chain
 
         # Optional: for now we pass empty chat histroy
         response = rag.invoke(question, chat_history=[])
