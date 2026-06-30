@@ -11,4 +11,4 @@
 ## template.yml - it is used for creating or automating the INFRA set up
 ## INFRA set up includes below: 
 ## ECR Repo, VPC( with 2 public subnets, internet gateway, ECS cluster, Task definition-FARGATE,
-## ECS service- no load balancer, IAM role, security group)
+## ECS service- no load balancer, IAM role, security group) okay
